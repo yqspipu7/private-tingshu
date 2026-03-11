@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>私人听书</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#121212;color:#e0e0e0;font-family:Microsoft YaHei,sans-serif;padding:15px;height:100vh;display:flex;flex-direction:column}
+.top-bar{text-align:center;padding:10px 0 20px;font-size:20px;font-weight:700;color:#fff}
+.file-area{margin-bottom:15px;display:flex;gap:10px;align-items:center}
+#file{flex:1;background:#1e1e1e;color:#fff;padding:10px;border:1px solid #333;border-radius:6px}
+button{background:#6200ee;color:#fff;border:none;padding:10px 14px;border-radius:6px;font-size:14px;cursor:pointer}
+button.gray{background:#333}
+.content{flex:1;background:#1a1a1a;padding:15px;border-radius:8px;overflow-y:auto;margin-bottom:15px;white-space:pre-wrap;line-height:1.6;font-size:16px}
+.control{display:flex;gap:10px;justify-content:center}
+</style>
+</head>
+<body>
+<div class="top-bar">私人听书</div>
+<div class="file-area">
+<input type="file" id="file" accept=".txt">
+<button onclick="loadFile()">导入小说</button>
+</div>
+<div class="content" id="content">请导入 TXT 小说</div>
+<div class="control">
+<button onclick="startRead()">多角色朗读</button>
+<button class="gray" onclick="pauseRead()">暂停</button>
+</div>
+<script>
+let utterance=null;
+let isSpeaking=false;
+let allText="";
+function loadFile(){const file=document.getElementById('file').files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{allText=e.target.result;document.getElementById('content').innerText=allText};reader.readAsText(file,'UTF-8')}
+function startRead(){if(!allText)return;stopRead();const lines=allText.split(/\n/);let index=0;function speakNext(){if(index>=lines.length)return;let line=lines[index].trim();index++;let u=new SpeechSynthesisUtterance(line);u.rate=1.0;if(line.startsWith('“')||line.startsWith('"')||line.startsWith('「')){u.voice=window.speechSynthesis.getVoices().find(v=>v.name.includes('女')||v.name.includes('Female')||v.lang.includes('zh-CN'))}else{u.voice=window.speechSynthesis.getVoices().find(v=>v.name.includes('男')||v.name.includes('Male')||v.lang.includes('zh-CN'))}u.onend=()=>speakNext();utterance=u;window.speechSynthesis.speak(u)}speakNext()}
+function pauseRead(){window.speechSynthesis.pause()}
+function stopRead(){window.speechSynthesis.cancel()}
+</script>
+</body>
+</html>
